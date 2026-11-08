@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل درجات الطلاب المتعثرين</title>
+    <!-- استدعاء Bootstrap 5 للغة العربية (RTL) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container my-5">
+        <!-- 1. عنوان الصفحة -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-primary">محلل درجات الطلاب المتعثرين</h1>
+            <p class="text-muted">إدارة وتحليل درجات الطلاب المتعثرين وتطبيق درجات الرأفة (من 40 إلى 49)</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 2 & 3. Form إدخال البيانات وزر الإضافة -->
+            <div class="col-lg-4">
+                <div class="card p-4 bg-white">
+                    <h4 class="mb-3 text-secondary">إضافة بيانات طالب</h4>
+                    <form id="studentForm">
+                        <div class="mb-3">
+                            <label for="studentId" class="form-label">رقم الطالب (ID)</label>
+                            <input type="text" class="form-control" id="studentId" placeholder="مثال: 101" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentAvg" class="form-label">متوسط الدرجات</label>
+                            <input type="number" step="0.1" min="0" max="100" class="form-control" id="studentAvg" placeholder="مثال: 45" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">إضافة إلى القائمة</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 4, 5 & 6. جدول عرض البيانات والنتائج وتطبيق الرأفة -->
+            <div class="col-lg-8">
+                <div class="card p-4 bg-white">
+                    <h4 class="mb-3 text-secondary">قائمة الطلاب والنتائج</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>رقم الطالب</th>
+                                    <th>المتوسط الأصلي</th>
+                                    <th>حالة التعثر (40 - 49)</th>
+                                    <th>المتوسط بعد الرأفة (حد أقصى 50)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                <!-- سيتم إضافة الصفوف هنا برمجياً -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- كود الـ JavaScript للتحكم بالبيانات والحسابات -->
+    <script>
+        const studentForm = document.getElementById('studentForm');
+        const studentTableBody = document.getElementById('studentTableBody');
+        
+        let students = [];
+
+        studentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('studentId').value.trim();
+            const avg = parseFloat(document.getElementById('studentAvg').value);
+
+            students.push({ id, avg });
+            renderTable();
+            studentForm.reset();
+        });
+
+        function renderTable() {
+            studentTableBody.innerHTML = '';
+
+            students.forEach(student => {
+                let isAtRisk = student.avg >= 40 && student.avg <= 49;
+                let newAvg = student.avg;
+                let statusText = '';
+                let statusClass = '';
+
+                if (isAtRisk) {
+                    newAvg = Math.min(student.avg + 5, 50);
+                    statusText = 'متعثر (مشمول بالرأفة)';
+                    statusClass = 'badge bg-warning text-dark';
+                } else if (student.avg < 40) {
+                    statusText = 'راسب (أقل من 40)';
+                    statusClass = 'badge bg-danger';
+                } else {
+                    statusText = 'ناجح / غير متعثر';
+                    statusClass = 'badge bg-success';
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="fw-bold">${student.id}</td>
+                    <td>${student.avg.toFixed(1)}</td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td class="fw-bold text-success">${newAvg.toFixed(1)}</td>
+                `;
+                studentTableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
